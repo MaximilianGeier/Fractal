@@ -8,18 +8,62 @@ namespace HanoiTowerConsole
     {
         static void Main(string[] args)
         {
-            int towersCount = 3;
-            int itemsCount = 4;
-            Stack<int>[] towers = GetTowers(towersCount, itemsCount);
+            AskParameters(out int algotrithmNum, out int towersNum, out int itemsNum);
+            Field field = new Field(towersNum, itemsNum);
 
-            DrawTowers(towers, itemsCount);
+            field.DrawTowers();
 
-            PerformIterativeTowerMoving(ref towers, itemsCount);
+            if (algotrithmNum == 1)
+                IterativeAlgorithmPack.PerformIterativeTowerMoving(ref field);
+            else
+                RecursiveAlgorithmPack.PerformRecursiveTowerMoving(ref field);
 
-            DrawTowers(towers, itemsCount);
+            field.DrawTowers();
         }
 
-        static Stack<int>[] GetTowers(int towersCount, int itemsCount)
+        static void AskParameters(out int algotrithmNum, out int towersNum, out int itemsNum)
+        {
+            Console.Write("Введите номер алгоритма (1-итеративный; 2-рекурсивный): ");
+            ConsoleKeyInfo firsQ = Console.ReadKey(false);
+            if (firsQ.Key == ConsoleKey.D1)
+                algotrithmNum = 1;
+            else if (firsQ.Key == ConsoleKey.D2)
+                algotrithmNum = 2;
+            else
+                throw new Exception();
+            Console.WriteLine();
+
+            if (algotrithmNum == 2)
+            {
+                Console.Write("Введите номер башен: ");
+                String secondQ = Console.ReadLine();
+                if (!(Int32.TryParse(secondQ, out towersNum) && towersNum > 1))
+                    throw new Exception("Ты шо наделал!");
+            }
+            else
+            {
+                towersNum = 3;
+            }
+
+            Console.Write("Введите количество элементов: ");
+            String thirdQ = Console.ReadLine();
+            if (!(Int32.TryParse(thirdQ, out itemsNum) && towersNum > 1))
+                throw new Exception("Ну и зачем?");
+            Console.WriteLine();
+        }
+    }
+
+    class Field
+    {
+        public readonly int TowersCount, ItemsCount;
+        readonly Stack<int>[] towers;
+        public Field(int towersCount, int itemsCount)
+        {
+            TowersCount = towersCount;
+            ItemsCount = itemsCount;
+            towers = GetTowersWithStartState(towersCount, itemsCount);
+        }
+        static Stack<int>[] GetTowersWithStartState(int towersCount, int itemsCount)
         {
             Stack<int>[] towers = new Stack<int>[towersCount];
             for (int i = 0; i < towers.Length; i++)
@@ -29,13 +73,12 @@ namespace HanoiTowerConsole
 
             return towers;
         }
-
-        static void DrawTowers(Stack<int>[] towers, int itemsCount)
+        public void DrawTowers()
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < towers.Length; i++)
             {
                 int[] tower = towers[i].Reverse().ToArray();
-                for (int ii = 0; ii < itemsCount; ii++)
+                for (int ii = 0; ii < ItemsCount; ii++)
                 {
                     if (ii < tower.Length)
                         Console.Write(tower[ii]);
@@ -46,8 +89,42 @@ namespace HanoiTowerConsole
             }
             Console.WriteLine();
         }
+        public void Drag(int fromTowerNum, int toTowerNum)
+        {
+            if (towers[fromTowerNum].Count != 0)
+                if (towers[toTowerNum].Count == 0 || towers[fromTowerNum].Peek() < towers[toTowerNum].Peek())
+                    towers[toTowerNum].Push(towers[fromTowerNum].Pop());
+                else
+                    throw new Exception("Попытка перетащить больший элемент на меньший");
+            else
+                throw new Exception("Попытка перетащить элемент из пустой башни");
 
-        static void PerformIterativeTowerMoving(ref Stack<int>[] towers, int itemsCount)
+            DrawTowers();
+        }
+        public int GetNumOfItems(int towerId)
+        {
+            return towers[towerId].Count;
+        }
+        public int GetLastItem(int towerId)
+        {
+            return towers[towerId].Peek();
+        }
+        public bool IsNormalState()
+        {
+            foreach (var tower in towers)
+            {
+                if (tower.Count != 0 && tower.Peek() != 1)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    static class IterativeAlgorithmPack
+    {
+        public static void PerformIterativeTowerMoving(ref Field field)
         {
             bool checkNeeded;
             bool hasSwap;
@@ -57,32 +134,31 @@ namespace HanoiTowerConsole
                 List<int> checkedTowers = new List<int>();
                 do
                 {
-                    int currentTowerId = GetTowerIdWithHighestEndItem(towers, checkedTowers);
+                    int currentTowerId = GetTowerIdWithHighestEndItem(field, checkedTowers);
 
-                    hasSwap = TrySwap(towers, currentTowerId, itemsCount);
+                    hasSwap = TrySwap(ref field, currentTowerId);
 
                     if (!hasSwap)
                         checkedTowers.Add(currentTowerId);
 
-                    if (towers[currentTowerId].Count == 0)
+                    if (field.GetNumOfItems(currentTowerId) == 0)
                         checkNeeded = true;
                 } while (!hasSwap);
 
-                DrawTowers(towers, itemsCount);
-            } while(!(checkNeeded && IsEnd(towers)));
+            } while (!(checkNeeded && field.IsNormalState()));
         }
 
-        static int GetTowerIdWithHighestEndItem(Stack<int>[] towers, List<int> checkedTowers)
+        static int GetTowerIdWithHighestEndItem(Field field, List<int> checkedTowers)
         {
             int id = -1;
             int max = 0;
-            for (int i = 0; i < towers.Length; i++)
+            for (int i = 0; i < field.TowersCount; i++)
             {
-                if (towers[i].Count > 0)
+                if (field.GetNumOfItems(i) > 0)
                 {
-                    if (!checkedTowers.Contains(i) && towers[i].Peek() > max)
+                    if (!checkedTowers.Contains(i) && field.GetLastItem(i) > max)
                     {
-                        max = towers[i].Peek();
+                        max = field.GetLastItem(i);
                         id = i;
                     }
                 }
@@ -94,30 +170,52 @@ namespace HanoiTowerConsole
                 throw new Exception();
         }
 
-        static bool TrySwap(Stack<int>[] towers, int towerId, int itemsCount)
+        static bool TrySwap(ref Field field, int towerId)
         {
-            int dir = ((towers[towerId].Peek() % 2) * 2 - 1) * (-(itemsCount % 2) * 2 + 1);
-            int nextId = (towerId + dir + towers.Length) % towers.Length;
-            if (towers[nextId].Count == 0 || towers[towerId].Peek() < towers[nextId].Peek())
+            int dir = ((field.GetLastItem(towerId) % 2) * 2 - 1) * (-(field.ItemsCount % 2) * 2 + 1);
+            int nextId = (towerId + dir + field.TowersCount) % field.TowersCount;
+            if (field.GetNumOfItems(nextId) == 0 || field.GetLastItem(towerId) < field.GetLastItem(nextId))
             {
-                towers[nextId].Push(towers[towerId].Pop());
+                field.Drag(towerId, nextId);
                 return true;
-            }else
+            }
+            else
             {
                 return false;
             }
         }
+    }
 
-        static bool IsEnd(Stack<int>[] towers)
+    static class RecursiveAlgorithmPack
+    {
+        public static void PerformRecursiveTowerMoving(ref Field field)
         {
-            foreach (var tower in towers)
+            DoRecursiveTowerMoving(ref field, 0, field.TowersCount - 1, 0);
+        }
+        static void DoRecursiveTowerMoving(ref Field field, int currentTowerId, int currentAimTowerId, int deep)
+        {
+            if (deep != field.GetNumOfItems(currentTowerId) - 1)
             {
-                if (tower.Count != 0 && tower.Peek() != 1)
-                {
-                    return false;
-                }
+                int transitTowerId = DefineNewAimTowerId(currentTowerId, currentAimTowerId);
+                int itemCount = field.GetNumOfItems(transitTowerId);
+                DoRecursiveTowerMoving(ref field, currentTowerId, transitTowerId, deep + 1);
+                field.Drag(currentTowerId, currentAimTowerId);
+                DoRecursiveTowerMoving(ref field, transitTowerId, currentAimTowerId, itemCount);
+                return;
             }
-            return true;
+
+            field.Drag(currentTowerId, currentAimTowerId);
+        }
+
+        static int DefineNewAimTowerId(int currentTowerId, int pastAimTowerId)
+        {
+            int i = 0;
+            do
+            {
+                if (i != currentTowerId && i != pastAimTowerId)
+                    return i;
+                i++;
+            } while (true);
         }
     }
 }
