@@ -18,7 +18,7 @@ namespace Fractal
     public partial class MainWindow : Window
     {
         static List<Point> Points = new List<Point>();
-        static int Deep = 8;
+        static int Deep = 5;
 
         public MainWindow()
         {
@@ -27,8 +27,7 @@ namespace Fractal
             string condition1 = "LbFRAFARFbL";
             string condition2 = "RAFLBFBLFAR";
             string str = "A";
-            for (int i = 0; i < Deep; i++)
-                str = LGenerator(str, condition1, condition2);
+            str = LGenerator(str, condition1, condition2);
             str = DeleteConditions(str);
             LParser(str, 15);
             Draw(Brushes.Green, 2);
@@ -52,6 +51,9 @@ namespace Fractal
 
         string LGenerator(string input, string condition1, string condition2)
         {
+            Deep--;
+            if (Deep >= 0)
+                input = LGenerator(input, condition1, condition2);
             input = input.Replace("A", condition1);
             input = input.Replace("B", condition2);
             input = input.Replace("b", "B");
