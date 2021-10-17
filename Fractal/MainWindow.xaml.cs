@@ -23,7 +23,7 @@ namespace Fractal
         {
             InitializeComponent();
 
-            CalculateAndDrawFractal(FractalName.HilbertCurve);
+            CalculateAndDrawFractal(FractalName.Tree);
         }
 
         void CalculateAndDrawFractal(FractalName fractalName)
@@ -35,7 +35,7 @@ namespace Fractal
                     hilbertCurvefractal.CalculateAndDraw(ref Field);
                     break;
                 case FractalName.Tree:
-                    TreeFractal treefractal = new TreeFractal(4, 5, 100);
+                    TreeFractal treefractal = new TreeFractal(4, 5, 130);
                     treefractal.CalculateAndDraw(ref Field, Width, Height);
                     break;
             }
@@ -171,21 +171,21 @@ namespace Fractal
                 double currentLength = Length * ((Depth - depth + 1d) / Depth);
                 Point currentPoint = new Point(lastPoint.X + Math.Cos(currentAngle) * currentLength, lastPoint.Y - Math.Sin(currentAngle) * currentLength);
                 
-                AddLine(lastPoint, currentPoint);
+                AddLine(lastPoint, currentPoint, depth);
                 if (depth < Depth)
                 {
                     DoFactorial(currentPoint, currentAngle, depth + 1);
                 }
             }
         }
-        void AddLine(Point point1, Point point2)
+        void AddLine(Point point1, Point point2, int depth)
         {
             Line line = new Line();
             line.X1 = point1.X;
             line.Y1 = point1.Y;
             line.X2 = point2.X;
             line.Y2 = point2.Y;
-            line.StrokeThickness = 2;
+            line.StrokeThickness = ((double)(Depth - depth) / Depth + 0.4) * 3;
             lines.Add(line);
         }
 
