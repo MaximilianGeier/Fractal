@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,7 +23,7 @@ namespace Fractal
         {
             InitializeComponent();
 
-            CalculateAndDrawFractal(FractalName.Tree);
+            CalculateAndDrawFractal(FractalName.HilbertCurve);
         }
 
         void CalculateAndDrawFractal(FractalName fractalName)
@@ -33,7 +35,7 @@ namespace Fractal
                     hilbertCurvefractal.CalculateAndDraw(ref Field);
                     break;
                 case FractalName.Tree:
-                    TreeFractal treefractal = new TreeFractal(3, 3, 100);
+                    TreeFractal treefractal = new TreeFractal(4, 5, 100);
                     treefractal.CalculateAndDraw(ref Field, Width, Height);
                     break;
             }
@@ -133,9 +135,9 @@ namespace Fractal
 
     class TreeFractal
     {
-        public readonly int BranchNum; //3
-        public readonly int Depth; //5
-        public readonly double Length; //30
+        public readonly int BranchNum; 
+        public readonly int Depth;     
+        public readonly double Length; 
         public readonly double AngleIndent;
         public readonly double AngleDigression;
         public readonly double AngleInc;
@@ -168,6 +170,7 @@ namespace Fractal
                 double currentAngle = angle - Math.PI / 2 + AngleIndent + AngleDigression + AngleInc * i;
                 double currentLength = Length * ((Depth - depth + 1d) / Depth);
                 Point currentPoint = new Point(lastPoint.X + Math.Cos(currentAngle) * currentLength, lastPoint.Y - Math.Sin(currentAngle) * currentLength);
+                
                 AddLine(lastPoint, currentPoint);
                 if (depth < Depth)
                 {
@@ -182,15 +185,18 @@ namespace Fractal
             line.Y1 = point1.Y;
             line.X2 = point2.X;
             line.Y2 = point2.Y;
-            line.StrokeThickness = 1;
-            line.Stroke = Brushes.Black;
+            line.StrokeThickness = 2;
             lines.Add(line);
         }
 
         void SetLinesOnCanvas(ref Canvas canvas)
         {
-            foreach(Line line in lines)
-                canvas.Children.Add(line);
+            for (int i = 0; i < lines.Count; i++)
+            {
+                byte value = (byte)((i/(double)lines.Count) * 210);
+                lines[i].Stroke = new SolidColorBrush(Color.FromRgb(value, value, value));
+                canvas.Children.Add(lines[i]);
+            }
         }
     }
 }
