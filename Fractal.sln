@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fractal", "Fractal\Fractal.csproj", "{6328D23F-5C2C-439A-AFD2-0753B57ED2F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HanoiTowerConsole", "HanoiTowerConsole\HanoiTowerConsole.csproj", "{6BDA9882-3646-41F7-9106-31874ECEA298}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HanoiTowerConsole", "HanoiTowerConsole\HanoiTowerConsole.csproj", "{6BDA9882-3646-41F7-9106-31874ECEA298}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E4CC1A0-5971-4707-B153-1C83A84FB20D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
